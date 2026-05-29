@@ -1,20 +1,20 @@
-import { createBrowserRouter } from "react-router-dom"
-import App from "./App"
-import Layout from "./pages/layout/Layout"
-import Products from "./pages/products/products"
+import { createBrowserRouter } from 'react-router-dom'
+import App from './App'
+import Layout from './pages/layout/Layout'
+import ProductList from './pages/ProductList/ProductList'
 
 export const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <Layout />,
     children: [
       {
         index: true,
-        element: <App />,
+        element: <ProductList />,
       },
       {
-        path: "products",
-        element: <Products />,
+        path: 'products',
+        element: <ProductList />,
       },
     ],
   },
