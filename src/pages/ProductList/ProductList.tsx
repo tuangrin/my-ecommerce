@@ -7,9 +7,13 @@ import { Input } from '@/components/ui/input'
 import { ShoppingCart } from 'lucide-react'
 import { SearchInput } from '@/components/SearchInput/SearchInput'
 import { toast } from 'sonner'
+import { Search } from 'lucide-react'
+import { ProductListLoading } from './ProductListLoading'
 
 export default function ProductList() {
   const products = useProductStore((state) => state.products)
+  const isLoadingProducts = useProductStore((state) => state.isLoadingProducts)
+  const productError = useProductStore((state) => state.productError)
   const [currentPage, setCurrentPage] = useState(1)
   const [searchInput, setSearchInput] = useState('')
 
@@ -18,7 +22,6 @@ export default function ProductList() {
   }
 
   const addToCart = (item: ProductType) => {
-    console.log('add to cart :>> ', item)
     const cartList: (ProductType & { quantity: number })[] = JSON.parse(
       localStorage.getItem('cartList') ?? '[]',
     )
@@ -68,6 +71,10 @@ export default function ProductList() {
     console.log('products :>> ', products)
   }, [products])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchInput])
+
   return (
     <>
       <div className="bg-white min-h-screen p-4">
@@ -80,69 +87,86 @@ export default function ProductList() {
               onChange={(event) => setSearchInput(event.target.value)}
             />
           </div>
+          {isLoadingProducts ? (
+            <ProductListLoading />
+          ) : productError ? (
+            <div className="flex h-64 flex-col items-center justify-center gap-3 text-slate-500">
+              <Search className="h-10 w-10" />
+              <p className="text-2xl">{productError}</p>
+            </div>
+          ) : visibleProducts.length > 0 ? (
+            <div className="grid grid-cols-4 gap-4">
+              {visibleProducts.map((product) => {
+                return (
+                  <div
+                    key={product.id}
+                    className="bg-white hover:shadow-lg rounded-xl p-3 shadow-md flex flex-col h-100"
+                  >
+                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                      <img
+                        src={product.photos[0]}
+                        className="w-full h-full object-contain cursor-pointer"
+                        loading="lazy"
+                        alt={product.title}
+                        onClick={() => goToDetailPage(product)}
+                      />
+                    </div>
 
-          <div className="grid grid-cols-4 gap-4">
-            {visibleProducts.map((product) => {
-              return (
-                <div
-                  key={product.id}
-                  className="bg-white hover:shadow-lg rounded-xl p-3 shadow-md flex flex-col h-100"
-                >
-                  <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                    <img
-                      src={product.photos[0]}
-                      className="w-full h-full object-contain cursor-pointer"
-                      loading="lazy"
-                      alt={product.title}
-                      onClick={() => goToDetailPage(product)}
-                    />
-                  </div>
-
-                  <div className="mt-3 flex flex-col flex-1 overflow-hidden">
-                    <p
-                      className="font-medium text-base truncate cursor-pointer hover:opacity-70"
-                      onClick={() => goToDetailPage(product)}
-                    >
-                      {product.title}
-                    </p>
-                    <p className="text-slate-400 text-xs line-clamp-2">
-                      {product.description}
-                    </p>
-                    <div className="mt-auto flex justify-between items-center">
-                      <div>
-                        <span className="font-semibold">{product.price} ฿</span>
-                        <div className="flex text-xs gap-x-2">
-                          {product.tags.map((tag) => {
-                            return (
-                              <>
-                                <div className="bg-sky-200 text-sky-800 py-0.5 px-2 rounded-full cursor-pointer hover:opacity-80 transition">
+                    <div className="mt-3 flex flex-col flex-1 overflow-hidden">
+                      <p
+                        className="font-medium text-base truncate cursor-pointer hover:opacity-70"
+                        onClick={() => goToDetailPage(product)}
+                      >
+                        {product.title}
+                      </p>
+                      <p className="text-slate-400 text-xs line-clamp-2">
+                        {product.description}
+                      </p>
+                      <div className="mt-auto flex justify-between items-center">
+                        <div>
+                          <span className="font-semibold">
+                            {product.price} ฿
+                          </span>
+                          <div className="flex text-xs gap-x-2">
+                            {product.tags.map((tag) => {
+                              return (
+                                <div
+                                  key={tag}
+                                  className="bg-sky-200 text-sky-800 py-0.5 px-2 rounded-full cursor-pointer hover:opacity-80 transition"
+                                >
                                   {tag}
                                 </div>
-                              </>
-                            )
-                          })}
+                              )
+                            })}
+                          </div>
                         </div>
-                      </div>
 
-                      <Button
-                        className="cursor-pointer"
-                        variant="outline"
-                        onClick={() => addToCart(product)}
-                      >
-                        <ShoppingCart />
-                      </Button>
+                        <Button
+                          className="cursor-pointer"
+                          variant="outline"
+                          onClick={() => addToCart(product)}
+                        >
+                          <ShoppingCart />
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-
+                )
+              })}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-64 gap-3 text-slate-500">
+              <Search className="w-10 h-10" />
+              <p className="text-2xl">
+                No results found {searchInput && <span>for {searchInput}</span>}
+              </p>
+            </div>
+          )}
           <div className="mt-3">
             <AppPagination
               currentPage={currentPage}
               limit={limit}
-              totalRecords={products.length}
+              totalRecords={filteredProducts.length}
               onPageChange={setCurrentPage}
             />
           </div>
