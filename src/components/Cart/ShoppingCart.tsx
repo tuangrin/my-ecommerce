@@ -76,7 +76,7 @@ export default function ShoppingCart({ onOrderProduct }: CartSummaryProps) {
 
   return (
     <>
-      <div className="w-full p-3">
+      <div className="w-full p-3 text-center">
         <div className="grid grid-cols-12 gap-4">
           <div className="col-span-8 border-r border-slate-300 p-3 flex flex-col">
             <CartItemsTable

@@ -20,6 +20,8 @@ import {
   ArrowRightIcon,
 } from 'lucide-react'
 import ShoppingCart from '@/components/Cart/ShoppingCart'
+import CustomerDetail from '@/components/Cart/CustomerDetail'
+import Payment from '@/components/Cart/Payment'
 
 const steps = [
   {
@@ -56,6 +58,12 @@ export default function Cart() {
     } else {
       goNext()
     }
+  }
+
+  const handleBackStep = () => {
+    if (currentIndex === 0) return
+
+    goBack()
   }
 
   return (
@@ -114,9 +122,18 @@ export default function Cart() {
             </StepperItem>
           ))}
         </StepperNav>
-        <StepperPanel className="w-10/12 mx-auto text-center text-sm">
+        <StepperPanel className="w-10/12 mx-auto text-sm">
           <StepperContent value="cart">
             <ShoppingCart onOrderProduct={handleNext} />
+          </StepperContent>
+          <StepperContent value="address">
+            <CustomerDetail
+              onBackStep={handleBackStep}
+              onOrderProduct={handleNext}
+            />
+          </StepperContent>
+          <StepperContent value="payment">
+            <Payment />
           </StepperContent>
         </StepperPanel>
       </Stepper>
